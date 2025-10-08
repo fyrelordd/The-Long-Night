@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Results - The Long Night</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Philosopher:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Philosopher', sans-serif;
+            background: #000000;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        
+        .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        
+        /* Fade-in overlay */
+        .fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000000;
+            z-index: 9999;
+            animation: fadeOut 3s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; pointer-events: none; }
+        }
+        
+        /* Main container - scrollable */
+        .results-container {
+            min-height: 130vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 4rem 2rem 3rem 2rem;
+            opacity: 0;
+            animation: contentFadeIn 2s ease-out 2s forwards;
+            position: relative;
+            transition: background 1s ease;
+        }
+        
+        /* Dynamic background based on outcome */
+        .results-container.victory {
+            background: radial-gradient(ellipse at top, rgba(212, 175, 55, 0.12) 0%, rgba(0, 0, 0, 1) 60%);
+        }
+        
+        .results-container.defeat {
+            background: radial-gradient(ellipse at top, rgba(59, 130, 246, 0.08) 0%, rgba(0, 0, 0, 1) 60%);
+        }
+        
+        .results-container.draw {
+            background: radial-gradient(ellipse at top, rgba(148, 163, 184, 0.08) 0%, rgba(0, 0, 0, 1) 60%);
+        }
+        
+        @keyframes contentFadeIn {
+            to { opacity: 1; }
+        }
+        
+        /* Score section - centered */
+        .score-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 4rem;
+        }
+        
+        /* Winner name */
+        .winner-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #d4af37;
+            text-shadow: 0 0 60px rgba(212, 175, 55, 0.3);
+            margin-bottom: 2rem;
+            text-align: center;
+            opacity: 0;
+            animation: slideDown 1.5s ease-out 2.5s forwards;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Winner score */
+        .winner-score {
+            font-size: 9rem;
+            font-weight: 900;
+            line-height: 1;
+            color: #d4af37;
+            text-shadow: 0 0 80px rgba(212, 175, 55, 0.4);
+            opacity: 0;
+            animation: scaleReveal 1.2s ease-out 3.5s forwards;
+        }
+        
+        /* Divider */
+        .score-divider {
+            font-size: 6rem;
+            font-weight: 300;
+            line-height: 1;
+            color: #475569;
+            margin: 1.5rem 0;
+            opacity: 0;
+            animation: fadeInSimple 1s ease-out 4.5s forwards;
+        }
+        
+        /* Loser score */
+        .loser-score {
+            font-size: 9rem;
+            font-weight: 900;
+            line-height: 1;
+            color: #64748b;
+            opacity: 0;
+            animation: scaleReveal 1.2s ease-out 5s forwards;
+        }
+        
+        /* Loser name */
+        .loser-name {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 2rem;
+            text-align: center;
+            color: #64748b;
+            opacity: 0;
+            animation: slideUp 1.5s ease-out 5.5s forwards;
+        }
+        
+        @keyframes scaleReveal {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes fadeInSimple {
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Verdict section */
+        .verdict-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 850px;
+            margin-bottom: 4rem;
+            opacity: 0;
+            animation: scrollReveal 1.5s ease-out 6s forwards;
+        }
+        
+        @keyframes scrollReveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Battle context label */
+        .battle-context {
+            font-size: 1rem;
+            color: #94a3b8;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        
+        /* Verdict text */
+        .verdict-text {
+            font-size: 1.25rem;
+            line-height: 2;
+            text-align: center;
+            color: #cbd5e1;
+            padding: 0 1rem;
+        }
+        
+        /* Action button */
+        .action-button {
+            opacity: 0;
+            animation: fadeInSimple 2s ease-out 7s forwards;
+        }
+        
+        .btn {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.6);
+            color: #cbd5e1;
+            padding: 1rem 3rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+        }
+        
+        .btn:hover {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: #64748b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Particle effects */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0.25;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+        
+        /* Victory glow particles */
+        .glow-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.8) 0%, transparent 70%);
+            animation: float 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-30px) translateX(15px);
+                opacity: 0.6;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .results-container {
+                padding: 3rem 1rem 2rem 1rem;
+                min-height: 140vh;
+            }
+            
+            .winner-name {
+                font-size: 1.75rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .winner-score, .loser-score {
+                font-size: 5.5rem;
+            }
+            
+            .score-divider {
+                font-size: 4rem;
+                margin: 1rem 0;
+            }
+            
+            .loser-name {
+                font-size: 1.5rem;
+                margin-top: 1.5rem;
+            }
+            
+            .verdict-text {
+                font-size: 1.05rem;
+                line-height: 1.8;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fade overlay -->
+    <div class="fade-overlay"></div>
+    
+    <!-- Results container -->
+    <div class="results-container" id="results-container">
+        <div class="particles" id="particles"></div>
+        <div id="glow-container"></div>
+        
+        <!-- Score section -->
+        <div class="score-section">
+            <h1 class="winner-name cinzel" id="winner-name">The Night King</h1>
+            <div class="winner-score cinzel" id="winner-score">100</div>
+            <div class="score-divider">−</div>
+            <div class="loser-score cinzel" id="loser-score">0</div>
+            <h2 class="loser-name cinzel" id="loser-name">Player</h2>
+        </div>
+        
+        <!-- Verdict section -->
+        <div class="verdict-section">
+            <p class="battle-context cinzel" id="battle-context">
+                <!-- Context label like "Overwhelming Victory" -->
+            </p>
+            <p class="verdict-text" id="verdict-text">
+                <!-- Verdict will be inserted here -->
+            </p>
+        </div>
+        
+        <!-- Action button -->
+        <div class="action-button">
+            <button onclick="resetAndGoHome()" class="btn">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Load game state
+        let gameState = JSON.parse(localStorage.getItem('asoiafGameState')) || {
+            squadName: 'Player',
+            squad: { characters: [], magicalBeings: [], weapons: [] }
+        };
+
+        const NIGHT_KING_POWER = 100;
+
+        // Calculate total score
+        function calculateScore() {
+            let total = 0;
+            if (gameState.squad.characters) {
+                gameState.squad.characters.forEach(c => total += c.score);
+            }
+            if (gameState.squad.magicalBeings) {
+                gameState.squad.magicalBeings.forEach(b => total += b.score);
+            }
+            if (gameState.squad.weapons) {
+                gameState.squad.weapons.forEach(w => total += w.score);
+            }
+            return total;
+        }
+
+        // Get battle outcome
+        function getBattleOutcome(playerScore, nkScore) {
+            const margin = Math.abs(playerScore - nkScore);
+            const playerWon = playerScore > nkScore;
+            const isDraw = playerScore === nkScore;
+            
+            let winnerName, winnerScore, loserName, loserScore, verdict, context, outcomeType;
+            
+            if (isDraw) {
+                // Draw - Player wins on tie
+                winnerName = gameState.squadName || 'Player';
+                winnerScore = playerScore;
+                loserName = "The Night King";
+                loserScore = nkScore;
+                verdict = "The Night King falls, but so do you. A pyrrhic victory—the realm is saved, but at the cost of everything. The songs will remember your sacrifice, though none remain to sing them.";
+                context = "Mutual Destruction";
+                outcomeType = "draw";
+            } else if (playerWon) {
+                // Player wins
+                winnerName = gameState.squadName || 'Player';
+                winnerScore = playerScore;
+                loserName = "The Night King";
+                loserScore = nkScore;
+                outcomeType = "victory";
+                
+                if (margin >= 25) {
+                    verdict = "An overwhelming triumph. The Night King stood no chance against your assembled might. The Long Night ends not with a whisper, but with the thunder of your victory. The realm is saved, and legends are born.";
+                    context = "Overwhelming Victory";
+                } else if (margin >= 10) {
+                    verdict = "A decisive victory. Though the battle was fierce and the Night King's power formidable, your forces proved superior when it mattered most. The realm will remember this day as the turning of the tide against the darkness.";
+                    context = "Decisive Victory";
+                } else {
+                    verdict = "By the narrowest of margins, you prevail. The Night King came within a breath of victory, his icy fingers scraping at triumph. But fate—or perhaps the gods—favored the living. Barely.";
+                    context = "Narrow Victory";
+                }
+            } else {
+                // Night King wins
+                winnerName = "The Night King";
+                winnerScore = nkScore;
+                loserName = gameState.squadName || 'Player';
+                loserScore = playerScore;
+                outcomeType = "defeat";
+                
+                if (margin >= 25) {
+                    verdict = "The living stood no chance. An effortless conquest. Your forces were swept aside like dust before a winter storm. The Long Night reigns eternal, and the realm falls into darkness without so much as a flicker of resistance. Winter is here, and it is forever.";
+                    context = "Effortless Conquest";
+                } else if (margin >= 10) {
+                    verdict = "The living resisted with courage, but their strength paled before the inexorable tide of death. Your forces fought valiantly, yet the Night King advances, unstoppable and eternal. The darkness claims all.";
+                    context = "Inevitable Victory";
+                } else {
+                    verdict = "A hard-fought battle that could have gone either way. Your forces came terrifyingly close to victory, steel and fire against ice and death. But in the end, the cold prevails. The Night King stands, and the realm falls.";
+                    context = "Hard-Fought Victory";
+                }
+            }
+            
+            return { winnerName, winnerScore, loserName, loserScore, verdict, context, outcomeType };
+        }
+
+        // Create particles
+        function createParticles(containerId, count) {
+            const container = document.getElementById(containerId);
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Create glow particles for victory
+        function createGlowParticles() {
+            const container = document.getElementById('glow-container');
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'glow-particle';
+                const size = Math.random() * 100 + 50;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 50 + '%';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Display results
+        function displayResults() {
+            const playerScore = calculateScore();
+            const nkScore = NIGHT_KING_POWER;
+            
+            const outcome = getBattleOutcome(playerScore, nkScore);
+            
+            // Set winner and loser info
+            document.getElementById('winner-name').textContent = outcome.winnerName;
+            document.getElementById('winner-score').textContent = outcome.winnerScore;
+            document.getElementById('loser-score').textContent = outcome.loserScore;
+            document.getElementById('loser-name').textContent = outcome.loserName;
+            
+            // Set verdict
+            document.getElementById('verdict-text').textContent = outcome.verdict;
+            document.getElementById('battle-context').textContent = outcome.context;
+            
+            // Set background
+            document.getElementById('results-container').className = 'results-container ' + outcome.outcomeType;
+            
+            // Create particles
+            createParticles('particles', 60);
+            
+            // Add glow particles for victory
+            if (outcome.outcomeType === 'victory') {
+                createGlowParticles();
+            }
+        }
+
+        // Reset and go home
+        function resetAndGoHome() {
+            localStorage.removeItem('asoiafGameState');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            displayResults();
+        });
+    </script>
+</body>
+</html>

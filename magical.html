@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Beings - Squad Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Philosopher:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Philosopher', sans-serif;
+            background: linear-gradient(to bottom, #0a0e27, #1a1a2e, #16213e);
+            color: #e0e0e0;
+        }
+        
+        h1, h2, h3, .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(100, 181, 246, 0.8), 0 0 40px rgba(100, 181, 246, 0.4);
+        }
+        
+        .gold-text {
+            color: #d4af37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .budget-display {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .being-card {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #334155;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .being-card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 8px 35px rgba(212, 175, 55, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .being-card.selected {
+            border-color: #10b981;
+            box-shadow: 0 8px 35px rgba(16, 185, 129, 0.4);
+        }
+        
+        .being-card.selected .being-portrait {
+            border-color: #10b981;
+        }
+        
+        .being-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .being-portrait {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #334155, #475569);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            border-bottom: 3px solid #475569;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .being-portrait-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+            filter: blur(1px);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            z-index: 0;
+        }
+        
+        .being-card:hover .being-portrait-bg {
+            filter: blur(0px);
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        
+        .being-card.selected .being-portrait-bg {
+            filter: blur(0px);
+            opacity: 0.9;
+        }
+        
+        .being-portrait::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(15, 23, 42, 0.3) 0%, 
+                rgba(15, 23, 42, 0.5) 50%,
+                rgba(15, 23, 42, 0.9) 100%);
+            z-index: 1;
+        }
+        
+        .being-card.selected .being-portrait::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(16, 185, 129, 0.15);
+            z-index: 2;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.25; }
+        }
+        
+        .being-portrait > span {
+            position: relative;
+            z-index: 3;
+        }
+        
+        .being-info {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.6);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #475569, #64748b);
+        }
+        
+        .btn-back:hover {
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+        }
+        
+        .quote-text {
+            font-style: italic;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            border-left: 3px solid #475569;
+            padding-left: 0.75rem;
+            margin: 0.75rem 0;
+        }
+        
+        .warning-badge {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(220, 38, 38, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header with Budget -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-90 backdrop-blur-sm border-b border-blue-900">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold cinzel glow-text">The Long Night</h1>
+                <p class="text-sm text-gray-400">Magical Beings Selection</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-center">
+                    <p class="text-sm text-gray-400">Magical Beings</p>
+                    <p class="text-xl font-bold text-blue-400 cinzel"><span id="magical-count">0</span>/2</p>
+                </div>
+                <div class="budget-display px-6 py-3 rounded-lg">
+                    <p class="text-sm text-gray-400">Treasury</p>
+                    <p class="text-2xl font-bold gold-text cinzel"><span id="budget">100</span> 💰</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 pt-24">
+        <!-- Magical Beings View -->
+        <div id="beings-view" class="mt-12 md:mt-8">
+            <h2 class="text-4xl md:text-5xl font-bold cinzel text-center mb-4 glow-text">Summon Magical Beings</h2>
+            <p class="text-center text-gray-300 mb-8 text-lg">Choose wisely - only one of each type allowed</p>
+            <p class="text-center text-red-400 mb-12 text-sm">⚠️ You cannot select two of the same creature type</p>
+            
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="beings-container">
+                <!-- Beings will be generated by JS -->
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-12 mb-16 flex justify-center">
+            <button onclick="goToSquad()" class="btn-back px-8 py-3 rounded-lg font-bold cinzel">
+                ← Back to Squad
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Default game state
+        const DEFAULT_STATE = {
+            budget: 100,
+            maxBudget: 100,
+            squad: {
+                characters: [],
+                magicalBeings: [],
+                weapons: []
+            },
+            houseCounts: {},
+            beingTypes: [],
+            currentView: 'magicalBeings'
+        };
+
+        // Initialize game state from localStorage or defaults
+        let gameState = loadGameState();
+
+        // Load game state with validation
+        function loadGameState() {
+            try {
+                const saved = localStorage.getItem('asoiafGameState');
+                if (!saved) return {...DEFAULT_STATE};
+                
+                const parsed = JSON.parse(saved);
+                
+                // Validate the loaded state
+                if (typeof parsed.budget !== 'number' || 
+                    !Array.isArray(parsed.squad?.magicalBeings) ||
+                    typeof parsed.houseCounts !== 'object') {
+                    console.warn('Invalid saved state, using defaults');
+                    return {...DEFAULT_STATE};
+                }
+                
+                return parsed;
+            } catch (error) {
+                console.error('Error loading game state:', error);
+                return {...DEFAULT_STATE};
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            try {
+                localStorage.setItem('asoiafGameState', JSON.stringify(gameState));
+                console.log('Game state saved successfully');
+            } catch (error) {
+                console.error('Error saving game state:', error);
+                alert('Failed to save game progress. Your browser storage might be full.');
+            }
+        }
+
+        // Magical Beings Database
+        const magicalBeings = [
+            { 
+                id: "dragon1", 
+                name: "Drogon", 
+                type: "dragon", 
+                price: 25, 
+                score: 20, 
+                description: "The largest and most fearsome of Daenerys' dragons",
+                image: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/103d6d97-fc7b-4358-902d-edb587e733a1/dbf6akf-56790ede-37dd-4d7d-90f3-91726d038b5d.png/v1/fill/w_1024,h_668,q_80,strp/drogon___completed_digital_painting_by_captaindishwasher_dbf6akf-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NjY4IiwicGF0aCI6Ii9mLzEwM2Q2ZDk3LWZjN2ItNDM1OC05MDJkLWVkYjU4N2U3MzNhMS9kYmY2YWtmLTU2NzkwZWRlLTM3ZGQtNGQ3ZC05MGYzLTkxNzI2ZDAzOGI1ZC5wbmciLCJ3aWR0aCI6Ijw9MTAyNCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.p9LQhHsXMvW2j4nW0qfFaKU3Q13O7PEXtEbQtsvVm0w"
+            },
+            { 
+                id: "dragon2", 
+                name: "Rhaegal", 
+                type: "dragon", 
+                price: 20, 
+                score: 18, 
+                description: "Green dragon named after Rhaegar Targaryen",
+                image: "https://awoiaf.westeros.org/images/thumb/0/0f/Rhaegal_a_hidden_agenda_by_christopherburdett.jpg/350px-Rhaegal_a_hidden_agenda_by_christopherburdett.jpg"
+            },
+            { 
+                id: "dragon3", 
+                name: "Viserion", 
+                type: "dragon", 
+                price: 20, 
+                score: 18, 
+                description: "Cream and gold dragon, fierce and loyal",
+                image: "https://awoiaf.westeros.org/images/thumb/b/bc/Viserion_a_hidden_agenda_by_christopherburdett.jpg/350px-Viserion_a_hidden_agenda_by_christopherburdett.jpg"
+            },
+            { 
+                id: "direwolf1", 
+                name: "Ghost", 
+                type: "direwolf", 
+                price: 15, 
+                score: 15, 
+                description: "Jon Snow's albino direwolf, silent and deadly",
+                image: "https://m.media-amazon.com/images/I/51ixNRJxPFL._UF894,1000_QL80_.jpg"
+            },
+            { 
+                id: "direwolf2", 
+                name: "Summer", 
+                type: "direwolf", 
+                price: 15, 
+                score: 15, 
+                description: "Bran's direwolf, brave and protective",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZYzyAIxA8-bdDUNa0q2h8uq5u9BBJ_ntPfw&s"
+            },
+            { 
+                id: "direwolf3", 
+                name: "Nymeria", 
+                type: "direwolf", 
+                price: 15, 
+                score: 12, 
+                description: "Arya's direwolf, leader of a massive pack",
+                image: "https://awoiaf.westeros.org/images/thumb/1/1d/Borja_Pindado_Nymeria.jpg/350px-Borja_Pindado_Nymeria.jpg"
+            },
+            { 
+                id: "direwolf4", 
+                name: "Greywind", 
+                type: "direwolf", 
+                price: 15, 
+                score: 12, 
+                description: "Robb’s direwolf, swift and deadly",
+                image: "https://i.pinimg.com/736x/94/e5/c2/94e5c2a2df69de00dc2e1380f21613b5.jpg"
+            },
+             { 
+                id: "direwolf6", 
+                name: "Lady", 
+                type: "direwolf", 
+                price: 10, 
+                score: 8, 
+                description: "Sansa’s direwolf, gentle and noble",
+                image: "https://awoiaf.westeros.org/images/thumb/7/75/Lady_by_smirtouille.jpg/350px-Lady_by_smirtouille.jpg"
+            },
+            { 
+                id: "direwolf5", 
+                name: "Shaggydog", 
+                type: "direwolf", 
+                price: 10, 
+                score: 10, 
+                description: "Rickon’s direwolf, wild and untamed",
+                image: "https://i.pinimg.com/736x/93/bf/d7/93bfd7a80495a2199b249c4bf2422149.jpg"
+            }
+           
+        ];
+
+        // Initialize beings view
+        function initBeingsView() {
+            const container = document.getElementById('beings-container');
+            container.innerHTML = '';
+            
+            magicalBeings.forEach(being => {
+                const card = createBeingCard(being);
+                container.appendChild(card);
+            });
+        }
+
+        // Create being card
+        function createBeingCard(being) {
+            const card = document.createElement('div');
+            const isSelected = gameState.squad.magicalBeings.find(b => b.id === being.id);
+            const typeAlreadySelected = gameState.beingTypes?.includes(being.type);
+            const canAfford = gameState.budget >= being.price;
+            const canSelect = gameState.squad.magicalBeings.length < 2 && canAfford && !typeAlreadySelected;
+            
+            card.className = `being-card rounded-xl ${isSelected ? 'selected' : ''} ${!canSelect && !isSelected ? 'disabled' : ''}`;
+            card.innerHTML = `
+                ${typeAlreadySelected && !isSelected ? `<span class="warning-badge">TYPE TAKEN</span>` : ''}
+                <div class="being-portrait">
+                    ${being.image 
+                        ? `<div class="being-portrait-bg" style="background-image: url('${being.image}');"></div>` 
+                        : `<span>👤</span>`}
+                </div>
+                <div class="being-info">
+                    <h4 class="text-xl font-bold cinzel text-center mb-2">${being.name}</h4>
+                    <p class="quote-text">"${being.description}"</p>
+                    <div class="mt-auto">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-400 text-sm">Price:</span>
+                            <span class="text-2xl font-bold gold-text">${being.price} 💰</span>
+                        </div>
+                        ${isSelected ? 
+                            `<button onclick="removeBeing('${being.id}')" class="w-full sm:w-auto px-4 py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-bold transition-all">✕ Remove from Squad</button>` :
+                            `<button onclick="addBeing('${being.id}')" ${!canSelect ? 'disabled' : ''} class="w-full sm:w-auto px-4 py-2 sm:py-3 text-sm sm:text-base btn-primary rounded-lg font-bold">+ Add to Squad</button>`
+                        }
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Add being to squad
+        function addBeing(beingId) {
+            if (gameState.squad.magicalBeings.length >= 2) {
+                alert('You can only select 2 magical beings!');
+                return;
+            }
+            
+            const being = magicalBeings.find(b => b.id === beingId);
+            
+            // Check if type already selected
+            if (gameState.beingTypes?.includes(being.type)) {
+                alert('You cannot select two of the same creature type!');
+                return;
+            }
+            
+            if (gameState.budget < being.price) {
+                alert('Not enough gold!');
+                return;
+            }
+            
+            gameState.squad.magicalBeings.push({...being, paidPrice: being.price});
+            gameState.budget -= being.price;
+            gameState.beingTypes = gameState.beingTypes || [];
+            gameState.beingTypes.push(being.type);
+            
+            saveGameState();
+            updateDisplay();
+            initBeingsView();
+        }
+
+        // Remove being from squad
+        function removeBeing(beingId) {
+            const being = gameState.squad.magicalBeings.find(b => b.id === beingId);
+            if (!being) return;
+            
+            gameState.budget += being.paidPrice;
+            gameState.beingTypes = gameState.beingTypes.filter(t => t !== being.type);
+            gameState.squad.magicalBeings = gameState.squad.magicalBeings.filter(b => b.id !== beingId);
+            
+            saveGameState();
+            updateDisplay();
+            initBeingsView();
+        }
+
+        // Update displays
+        function updateDisplay() {
+            document.getElementById('budget').textContent = gameState.budget;
+            document.getElementById('magical-count').textContent = gameState.squad.magicalBeings.length;
+        }
+
+        // Navigation
+        function goToSquad() {
+            gameState.currentView = 'forge';
+            saveGameState();
+            window.location.href = 'forge-alliance.html';
+        }
+
+        // Add beforeunload to save state before leaving
+        window.addEventListener('beforeunload', function() {
+            saveGameState();
+        });
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
+            initBeingsView();
+        });
+    </script>
+</body>
+</html>

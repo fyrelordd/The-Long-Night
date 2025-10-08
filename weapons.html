@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legendary Weapons - Squad Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Philosopher:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Philosopher', sans-serif;
+            background: linear-gradient(to bottom, #0a0e27, #1a1a2e, #16213e);
+            color: #e0e0e0;
+        }
+        
+        h1, h2, h3, .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(100, 181, 246, 0.8), 0 0 40px rgba(100, 181, 246, 0.4);
+        }
+        
+        .gold-text {
+            color: #d4af37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .budget-display {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .weapon-card {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #334155;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .weapon-card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 8px 35px rgba(212, 175, 55, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .weapon-card.selected {
+            border-color: #10b981;
+            box-shadow: 0 8px 35px rgba(16, 185, 129, 0.4);
+        }
+        
+        .weapon-card.selected .weapon-portrait {
+            border-color: #10b981;
+        }
+        
+        .weapon-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .weapon-portrait {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #334155, #475569);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            border-bottom: 3px solid #475569;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .weapon-portrait-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(1px);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            z-index: 0;
+        }
+        
+        .weapon-card:hover .weapon-portrait-bg {
+            filter: blur(0px);
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        
+        .weapon-card.selected .weapon-portrait-bg {
+            filter: blur(0px);
+            opacity: 0.9;
+        }
+        
+        .weapon-portrait::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(15, 23, 42, 0.3) 0%, 
+                rgba(15, 23, 42, 0.5) 50%,
+                rgba(15, 23, 42, 0.9) 100%);
+            z-index: 1;
+        }
+        
+        .weapon-card.selected .weapon-portrait::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(16, 185, 129, 0.15);
+            z-index: 2;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.25; }
+        }
+        
+        .weapon-portrait > span {
+            position: relative;
+            z-index: 3;
+        }
+        
+        .weapon-info {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.6);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #475569, #64748b);
+        }
+        
+        .btn-back:hover {
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+        }
+        
+        .quote-text {
+            font-style: italic;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            border-left: 3px solid #475569;
+            padding-left: 0.75rem;
+            margin: 0.75rem 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header with Budget -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-90 backdrop-blur-sm border-b border-blue-900">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold cinzel glow-text">The Long Night</h1>
+                <p class="text-sm text-gray-400">Weapons Selection</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-center">
+                    <p class="text-sm text-gray-400">Weapons</p>
+                    <p class="text-xl font-bold text-blue-400 cinzel"><span id="weapon-count">0</span>/2</p>
+                </div>
+                <div class="budget-display px-6 py-3 rounded-lg">
+                    <p class="text-sm text-gray-400">Treasury</p>
+                    <p class="text-2xl font-bold gold-text cinzel"><span id="budget">100</span> 💰</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 pt-24">
+        <!-- Weapons View -->
+        <div id="weapons-view" class="mt-12 md:mt-8">
+            <h2 class="text-4xl md:text-5xl font-bold cinzel text-center mb-4 glow-text">Legendary Weapons</h2>
+            <p class="text-center text-gray-300 mb-12 text-lg">Arm yourself with artifacts forged to fight the darkness</p>
+            
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="weapons-container">
+                <!-- Weapons will be generated by JS -->
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-12 mb-16 flex justify-center">
+            <button onclick="goToSquad()" class="btn-back px-8 py-3 rounded-lg font-bold cinzel">
+                ← Back to Squad
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize game state from localStorage
+        let gameState = JSON.parse(localStorage.getItem('asoiafGameState')) || {
+            budget: 100,
+            maxBudget: 100,
+            squad: {
+                characters: [],
+                magicalBeings: [],
+                weapons: []
+            },
+            houseCounts: {},
+            beingTypes: [],
+            currentView: 'weapons'
+        };
+
+        // Save game state
+        function saveGameState() {
+            localStorage.setItem('asoiafGameState', JSON.stringify(gameState));
+        }
+
+        // Weapons Database
+        const weapons = [
+            { id: "weap15", name: "Wildfire", price: 15, score: 15, description: "Highly volatile green substance brewed by the alchemists of King's Landing, ignites on contact and burns hotter and longer than normal fire", image: "https://awoiaf.westeros.org/images/thumb/a/ad/Battle_of_the_Blackwater.jpg/350px-Battle_of_the_Blackwater.jpg" },
+            { id: "weap14", name: "Longbows", price: 15, score: 12, description: "Sacred longbow crafted from yew, used by the First Men to fight giants and other ancient threats beyond the Wall", image: "https://awoiaf.westeros.org/images/7/78/Longspear_by_henning.jpg" },
+            { id: "weap9", name: "War Hammer", price: 15, score: 12, description: "A heavy iron weapon favored by warriors like Robert Baratheon, capable of crushing armor and bone", image: "https://epicswords.com/wp-content/uploads/2021/06/Image-5-2.jpg" },
+            { id: "weap16", name: "Morningstar", price: 15, score: 10, description: " A brutal spiked mace favored by knights of unmatched strength, its iron head delivers devastating impact in close combat", image: "https://pm1.aminoapps.com/6666/c10c8c053f10f363ca7857ffd8c6edd48190065a_hq.jpg" },
+           
+            
+            { id: "weap13", name: "Blackfyre", price: 15, score: 12, description: "Valyrian steel sword of Aegon the Conqueror", image: "https://pm1.aminoapps.com/6544/90a3f298a60804ccc865941f481a4a9a93fb0e1e_hq.jpg" },
+            { id: "weap1", name: "Longclaw", price: 15, score: 12, description: "Jon Snow's Valyrian steel bastard sword, ancestral blade of House Mormont", image: "https://i.pinimg.com/736x/c5/d5/b0/c5d5b014cbe246ce16ac59f65c99bcc6.jpg" },
+            { id: "weap5", name: "Heartsbane", price: 15, score: 10, description: "House Tarly's Valyrian steel greatsword", image: "https://awoiaf.westeros.org/images/thumb/5/52/Heartsbane_AntonioMa%C3%ADnez.jpg/350px-Heartsbane_AntonioMa%C3%ADnez.jpg" },
+            { id: "weap6", name: "Lady Forlorn", price: 15, score: 10, description: "Valyrian steel sword of House Corbray", image: "https://awoiaf.westeros.org/images/thumb/d/d4/JB_Casacop_Lady_Forlorn.jpg/400px-JB_Casacop_Lady_Forlorn.jpg" },
+          
+            { id: "weap8", name: "Dawn", price: 15, score: 15, description: "Ancestral sword of House Dayne, forged from the heart of a fallen star and borne only by the Sword of the Morning", image: "https://i.pinimg.com/736x/50/75/07/50750780fc3f74af7a3728126b036778.jpg" },
+            { id: "weap11", name: "Red Rain", price: 15, score: 10, description: "Valyrian steel sword of House Drumm", image: "https://awoiaf.westeros.org/images/thumb/2/2c/TommyArnold_Red_Rain.png/350px-TommyArnold_Red_Rain.png" },
+            { id: "weap12", name: "Nightfall", price: 15, score: 10, description: "Valyrian steel sword of House Harlaw", image: "https://awoiaf.westeros.org/images/thumb/7/76/Nightfall.jpg/350px-Nightfall.jpg" },
+            { id: "weap2", name: "Ice", price: 15, score: 12, description: "House Stark's greatsword, Valyrian steel of unmatched quality", image: "https://awoiaf.westeros.org/images/1/18/Ice_Sarah_Biddle_II.png" },
+           
+            
+            { id: "weap3", name: "Oathkeeper", price: 10, score: 8, description: "Reforged from Ice, given to Brienne of Tarth", image: "https://external-preview.redd.it/ADw8LQcXry2VulxzTDXRhL_jtuuUiAzzkdssYpdxddQ.jpg?auto=webp&s=f6f7151c4e99b6240a9f7f49b64d8ef235574fb8" },
+            { id: "weap4", name: "Widow's Wail", price: 10, score: 5, description: "Reforged from Ice, wielded by King Joffrey", image: "https://awoiaf.westeros.org/images/thumb/6/68/Joshua_CairosJoff_Widows_Wail.jpg/350px-Joshua_CairosJoff_Widows_Wail.jpg" },
+            { id: "weap7", name: "Dragonglass", price: 10, score: 10, description: "Brittle materials used to forge weapons capable of killing White Walkers and wights, treasured by the Night’s Watch and northern clans", image: "https://cdna.artstation.com/p/assets/images/images/054/597/060/large/nick-jedi-2.jpg?1664904920" },
+              ];
+
+        // Initialize weapons view
+        function initWeaponsView() {
+            const container = document.getElementById('weapons-container');
+            container.innerHTML = '';
+            
+            weapons.forEach(weapon => {
+                const card = createWeaponCard(weapon);
+                container.appendChild(card);
+            });
+        }
+
+        // Create weapon card
+        function createWeaponCard(weapon) {
+            const card = document.createElement('div');
+            const isSelected = gameState.squad.weapons.find(w => w.id === weapon.id);
+            const canAfford = gameState.budget >= weapon.price;
+            const canSelect = gameState.squad.weapons.length < 2 && canAfford;
+            
+            card.className = `weapon-card rounded-xl ${isSelected ? 'selected' : ''} ${!canSelect && !isSelected ? 'disabled' : ''}`;
+            card.innerHTML = `
+                <div class="weapon-portrait">
+                    ${weapon.image 
+                        ? `<div class="weapon-portrait-bg" style="background-image: url('${weapon.image}');"></div>` 
+                        : `<span>⚔️</span>`}
+                </div>
+                <div class="weapon-info">
+                    <h4 class="text-xl font-bold cinzel text-center mb-2">${weapon.name}</h4>
+                    <p class="quote-text">"${weapon.description}"</p>
+                    <div class="mt-auto">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-400 text-sm">Price:</span>
+                            <span class="text-2xl font-bold gold-text">${weapon.price} 💰</span>
+                        </div>
+                        ${isSelected ? 
+                            `<button onclick="removeWeapon('${weapon.id}')" class="w-full sm:w-auto px-4 py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-bold transition-all">✕ Remove from Squad</button>` :
+                            `<button onclick="addWeapon('${weapon.id}')" ${!canSelect ? 'disabled' : ''} class="w-full sm:w-auto px-4 py-2 sm:py-3 text-sm sm:text-base btn-primary rounded-lg font-bold">+ Add to Squad</button>`
+                        }
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Add weapon to squad
+        function addWeapon(weaponId) {
+            if (gameState.squad.weapons.length >= 2) {
+                alert('You can only select 2 weapons!');
+                return;
+            }
+            
+            const weapon = weapons.find(w => w.id === weaponId);
+            
+            if (gameState.budget < weapon.price) {
+                alert('Not enough gold!');
+                return;
+            }
+            
+            gameState.squad.weapons.push({...weapon, paidPrice: weapon.price});
+            gameState.budget -= weapon.price;
+            
+            saveGameState();
+            updateDisplay();
+            initWeaponsView();
+        }
+
+        // Remove weapon from squad
+        function removeWeapon(weaponId) {
+            const weapon = gameState.squad.weapons.find(w => w.id === weaponId);
+            if (!weapon) return;
+            
+            gameState.budget += weapon.paidPrice;
+            gameState.squad.weapons = gameState.squad.weapons.filter(w => w.id !== weaponId);
+            
+            saveGameState();
+            updateDisplay();
+            initWeaponsView();
+        }
+
+        // Update displays
+        function updateDisplay() {
+            document.getElementById('budget').textContent = gameState.budget;
+            document.getElementById('weapon-count').textContent = gameState.squad.weapons.length;
+        }
+
+        // Navigation
+        function goToSquad() {
+            gameState.currentView = 'forge';
+            saveGameState();
+            window.location.href = 'forge-alliance.html';
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
+            initWeaponsView();
+        });
+    </script>
+</body>
+</html>

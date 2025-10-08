@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assemble Your Squad - Defeat the Night King</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Philosopher:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Philosopher', sans-serif;
+            background: linear-gradient(to bottom, #0a0e27, #1a1a2e, #16213e);
+            color: #e0e0e0;
+        }
+        
+        h1, h2, h3, .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(10, 14, 39, 0.9)), 
+                        url('https://i.pinimg.com/1200x/24/8d/ba/248dba4b824d127606123c6e19af552c.jpg') center/cover;
+            min-height: 70vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .frost-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(100, 181, 246, 0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(100, 181, 246, 0.8), 0 0 40px rgba(100, 181, 246, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .gold-text {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            border-color: #64b5f6;
+            box-shadow: 0 10px 40px rgba(100, 181, 246, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.6);
+        }
+        
+        .budget-display {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .section-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border: 2px solid #475569;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        #shop-sections {
+            padding-top: 6rem;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+        
+        a.section-card {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header with Budget -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-80 backdrop-blur-sm border-b border-blue-900">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold cinzel glow-text">The Long Night</h1>
+            <div class="budget-display px-6 py-3 rounded-lg">
+                <p class="text-sm text-gray-400">Treasury</p>
+                 <p class="text-2xl font-bold gold-text cinzel"><span id="budget">100</span> 💰</p>
+                 </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section flex items-center justify-center relative pt-32 md:pt-40">
+
+        <div class="frost-effect"></div>
+        <div class="container mx-auto px-6 py-4 text-center relative z-10">
+            <div class="float-animation">
+                <h2 class="text-5xl md:text-7xl font-black cinzel mb-6 glow-text">
+                    THE NIGHT KING RISES
+                </h2>
+                <p class="text-xl md:text-2xl text-blue-200 mb-4 max-w-3xl mx-auto">
+                    Winter has come. The dead march south. The realm's fate hangs by a thread.
+                </p>
+                <p class="text-2xl md:text-3xl font-bold gold-text cinzel mb-8">
+                    Assemble your squad. Defeat the darkness.
+                </p>
+            </div>
+            
+            <div class="bg-black bg-opacity-60 backdrop-blur-sm border-2 border-blue-500 rounded-lg p-8 max-w-2xl mx-auto mb-8">
+                <h3 class="text-2xl font-bold cinzel mb-4 text-blue-300">The Challenge</h3>
+                <ul class="text-left space-y-3 text-lg">
+                    <li class="flex items-start">
+                        <span class="gold-text mr-3">⚔️</span>
+                        <span>Choose <strong class="gold-text">3 Characters</strong> from the Great Houses</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="gold-text mr-3">🐉</span>
+                        <span>Summon <strong class="gold-text">2 Magical Beings</strong> to aid your cause</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="gold-text mr-3">⚡</span>
+                        <span>Arm yourself with <strong class="gold-text">2 Legendary Weapons</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="gold-text mr-3">💰</span>
+                        <span>Budget: <strong class="gold-text">100 Gold Dragons</strong> (spend wisely!)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-3">⚠️</span>
+                        <span><strong class="text-red-400">Warning:</strong> Multiple characters from the same house cost more!</span>
+                    </li>
+                </ul>
+            </div>
+
+            <button onclick="startJourney()" class="btn-primary text-xl font-bold px-12 py-4 rounded-lg cinzel hover:scale-105 transition-transform">
+                BEGIN YOUR QUEST
+            </button>
+        </div>
+    </section>
+
+    <!-- Squad Building Sections -->
+    <section id="shop-sections" class="container mx-auto px-6 py-20 hidden" style="padding-top: 6rem;">
+        <h2 class="text-4xl md:text-5xl font-bold cinzel text-center mb-16 glow-text">
+            Forge Your Alliance
+        </h2>
+
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <!-- Characters Card -->
+            <a href="characters.html" class="section-card card-hover rounded-xl p-8 cursor-pointer block no-underline">
+                <div class="text-6xl mb-4 text-center">👑</div>
+                <h3 class="text-2xl font-bold cinzel text-center mb-3 gold-text">Characters</h3>
+                <p class="text-center text-gray-300 mb-4">Choose 3 heroes from the Great Houses or the realm's finest warriors</p>
+                <div class="text-center">
+                    <span class="inline-block bg-blue-900 px-4 py-2 rounded-full text-sm" id="character-count">0/3 Selected</span>
+                </div>
+            </a>
+
+            <!-- Magical Beings Card -->
+            <div class="section-card card-hover rounded-xl p-8 cursor-pointer" onclick="goToMagicalBeings()">
+                <div class="text-6xl mb-4 text-center">🐉</div>
+                <h3 class="text-2xl font-bold cinzel text-center mb-3 gold-text">Magical Beings</h3>
+                <p class="text-center text-gray-300 mb-4">Summon 2 mystical creatures to turn the tide of battle</p>
+                <div class="text-center">
+                    <span class="inline-block bg-blue-900 px-4 py-2 rounded-full text-sm" id="magical-count">0/2 Selected</span>
+                </div>
+            </div>
+
+            <!-- Weapons Card -->
+            <div class="section-card card-hover rounded-xl p-8 cursor-pointer" onclick="goToWeapons()">
+                <div class="text-6xl mb-4 text-center">⚔️</div>
+                <h3 class="text-2xl font-bold cinzel text-center mb-3 gold-text">Legendary Weapons</h3>
+                <p class="text-center text-gray-300 mb-4">Equip 2 powerful artifacts forged to fight darkness</p>
+                <div class="text-center">
+                    <span class="inline-block bg-blue-900 px-4 py-2 rounded-full text-sm" id="weapon-count">0/2 Selected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Squad Review Button -->
+        <div class="text-center">
+            <button onclick="reviewSquad()" class="btn-primary text-xl font-bold px-10 py-4 rounded-lg cinzel hover:scale-105 transition-transform">
+                SELECT YOUR SQUAD
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-blue-900 py-8 mt-20">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p class="cinzel">When you play the game of thrones, you win or you die.</p>
+            <p class="text-sm mt-2"> &copy; 2025 fyrelordd | All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize game state from localStorage or defaults
+        let gameState = JSON.parse(localStorage.getItem('asoiafGameState')) || {
+            budget: 100,
+            maxBudget: 100,
+            squad: {
+                characters: [],
+                magicalBeings: [],
+                weapons: []
+            },
+            houseCounts: {},
+            currentView: 'hero'
+        };
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('asoiafGameState', JSON.stringify(gameState));
+        }
+
+        function startJourney() {
+            saveGameState();
+            window.location.href = 'forge-alliance.html';
+        }
+
+        function goToCharacters() {
+            saveGameState();
+            window.location.href = 'characters.html';
+        }
+
+        function goToMagicalBeings() {
+            alert('Magical Beings shop coming soon!');
+        }
+
+        function goToWeapons() {
+            alert('Weapons shop coming soon!');
+        }
+
+        function reviewSquad() {
+            if (gameState.squad.characters.length === 0 && 
+                gameState.squad.magicalBeings.length === 0 && 
+                gameState.squad.weapons.length === 0) {
+                alert('Your squad is empty! Recruit some allies first.');
+                return;
+            }
+            alert('Squad review page coming soon!');
+        }
+
+        function updateBudgetDisplay() {
+            document.getElementById('budget').textContent = gameState.budget;
+        }
+
+        function updateCounters() {
+            document.getElementById('character-count').textContent = 
+                `${gameState.squad.characters.length}/3 Selected`;
+            document.getElementById('magical-count').textContent = 
+                `${gameState.squad.magicalBeings.length}/2 Selected`;
+            document.getElementById('weapon-count').textContent = 
+                `${gameState.squad.weapons.length}/2 Selected`;
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateBudgetDisplay();
+            updateCounters();
+        });
+    </script>
+</body>
+</html>
